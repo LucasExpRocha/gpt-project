@@ -3,11 +3,12 @@
 import { Aside } from "@/components/Aside";
 import { Header } from "@/components/Header";
 import { Navbar } from "@/components/Navbar";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
 
 type MyTranscriptions = {
   [key: string]: string;
-}
+};
 
 const transcricoes: MyTranscriptions = {
   "1s": "aaaa",
@@ -40,6 +41,17 @@ const transcricoes: MyTranscriptions = {
 
 const Page = () => {
   const [selected, setSelected] = useState("");
+  const [teste, setTeste] = useState("");
+  
+  useEffect(() => {
+    setTeste(transcricoes[selected]);
+  },[selected]);
+  
+  const handleChangeSelectedValue = (value: string) => {
+    setTeste(value);
+    transcricoes[selected] = value;
+  };
+
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -54,7 +66,8 @@ const Page = () => {
           <main className="px-4 py-2">
             <textarea
               className="w-full min-h-vh-minus-200 resize-none bg-transparent p-2"
-              defaultValue={transcricoes[selected] || ""}
+              value={teste}
+              onChange={({ target }) => handleChangeSelectedValue(target.value)}
             />
           </main>
         </div>

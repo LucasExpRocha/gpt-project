@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { Modal } from "./Modal";
-import axios from "axios";
+import { Storage } from "@google-cloud/storage";
+import { SpeechClient } from "@google-cloud/speech";
 
 interface Props {
   transcriptions: { [key: string]: string };
@@ -17,41 +18,6 @@ export const Aside = ({
 
   const handleCloseModal = () => setIsOpen(false);
   const handleOpenModal = () => setIsOpen(true);
-
-  // const [transcription, setTranscription] = useState("");
-  // const [listening, setListening] = useState(false);
-  const [selectedFile, setSelectedFile] = useState(null);
-
-  // const createRecognition = () => {
-  //   const SpeechRecognition =
-  //     window.SpeechRecognition || window.webkitSpeechRecognition;
-  //   const recognition =
-  //     SpeechRecognition !== undefined ? new SpeechRecognition() : null;
-
-  //   if (!recognition) {
-  //     return;
-  //   }
-  //   recognition.lang = "pt-BR";
-
-  //   recognition.onstart = () => setListening(true);
-  //   recognition.onend = () => setListening(false);
-  //   recognition.onerror = (event) => console.log("error", event);
-  //   recognition.onresult = (event) => {
-  //     const current = event.resultIndex;
-  //     const transcript = event.results[current][0].transcript;
-  //     setTranscription(transcript);
-  //     console.log(transcript);
-  //   };
-
-  //   return recognition;
-  // };
-
-  // const recognition = createRecognition();
-
-  const handleFileChange = ({ target }: any) => {
-    const file = target.files[0];
-    setSelectedFile(file);
-  };
 
   const handleSelectTranscription = ({ target }: any) =>
     setSelectTranscription(target.innerText);
@@ -96,19 +62,13 @@ export const Aside = ({
       <Modal closeModal={handleCloseModal} isOpen={isOpen}>
         <div className="flex flex-col items-center gap-2">
           <h3 className="text-center text-lg">Transcrição de Áudio</h3>
-          {/* <button
-            onClick={() => {
-              if (!recognition) return;
-              setListening(false);
-              listening ? recognition.stop() : recognition.start();
-            }}
-          >
-            recognition
-          </button> */}
-          <input type="file" accept=".flac, .wav" onChange={handleFileChange} />
+          <input type="file" accept="audio/*" />
         </div>
         <div className="flex justify-center mt-4">
-          <button className="rounded bg-slate-600 bg-opacity-80 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+          <button
+            onClick={() => console.log('oi')}
+            className="rounded bg-slate-600 bg-opacity-80 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+          >
             Transcrever
           </button>
           <button
