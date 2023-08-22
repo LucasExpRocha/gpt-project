@@ -2,25 +2,31 @@ import { Dispatch, SetStateAction, useRef, useState } from "react";
 import { Modal } from "./Modal";
 import axios from "axios";
 import { CircleAnimated } from "./circleAnimated";
+import { api } from "@/services/api";
+import { MyTranscriptions } from "@/app/page";
 
 interface Props {
   transcriptions: { [key: string]: string };
+  setTranscriptions: Dispatch<SetStateAction<MyTranscriptions>>;
   setSelectTranscription: Dispatch<SetStateAction<string>>;
   selected: string;
 }
 
 export const Aside = ({
   transcriptions,
+  setTranscriptions,
   setSelectTranscription,
   selected,
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [routeToVideo, setRouteToVideo] = useState("");
   const [awaiting, setAwaiting] = useState(false);
-  const [transcription, setTranscription] = useState("");
+  const [optionFileSelected, setOptionFileSelected] = useState(false);
 
   const handleCloseModal = () => setIsOpen(false);
   const handleOpenModal = () => setIsOpen(true);
+  const handleOptionFileSelected = () => setOptionFileSelected(true);
+  const handleOptionUrlSelected = () => setOptionFileSelected(false);
 
   const handleSelectTranscription = ({ target }: any) => {
     setSelectTranscription(target.innerText);
@@ -31,19 +37,16 @@ export const Aside = ({
 
     setAwaiting(true);
     try {
-      const transcribe = await axios.post(
-        "http://localhost:8080/speech/transcribe/meetings",
-        {
-          fileName: routeToVideo,
-        }
-      );
-      setTranscription(transcribe.data.transcription);
+      const transcribe = await api.post("/speech/transcribe/meetings", {
+        fileName: routeToVideo,
+      });
       const othersTranscriptions = localStorage.getItem("transcriptions");
       const newTranscriptions = {
         ...JSON.parse(othersTranscriptions || "{}"),
         [routeToVideo]: transcribe.data.transcription,
       };
       localStorage.setItem("transcriptions", JSON.stringify(newTranscriptions));
+      setTranscriptions(newTranscriptions);
     } catch (error) {
       console.log(error);
     } finally {
@@ -94,25 +97,66 @@ export const Aside = ({
         tailwindCss="max-w-2xl"
       >
         <form className="space-y-6" action="#" method="POST">
-          <div>
-            <label
-              htmlFor="routeToVideo"
-              className="block text-sm font-medium leading-6 text-gray-900"
+          <div className="flex justify-between">
+            <button
+              className={
+                (!optionFileSelected
+                  ? "border-b-2 border-x-cyan-100"
+                  : "border-b-0") + " mx-auto h-full w-full pb-2"
+              }
+              onClick={handleOptionUrlSelected}
             >
-              Informe a rota do video
-            </label>
-            <div className="mt-2">
+              URL
+            </button>
+            <button
+              className={
+                (optionFileSelected
+                  ? "border-b-2 border-x-cyan-100"
+                  : "border-b-0") + " mx-auto h-full w-full pb-2"
+              }
+              onClick={handleOptionFileSelected}
+            >
+              ARQUIVO
+            </button>
+          </div>
+
+          {optionFileSelected ? (
+            <>
+              <label
+                htmlFor="routeToVideo"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Selecione o Video
+              </label>
               <input
                 id="routeToVideo"
                 name="routeToVideo"
-                type="routeToVideo"
+                type="file"
+                accept=".flac"
+                placeholder="ex: gs://irsnbucket/nomevideo.flac"
+                value={routeToVideo}
+                className="block w-full rounded-md p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
+              />
+            </>
+          ) : (
+            <>
+              <label
+                htmlFor="routeToVideo"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Informe a rota do video
+              </label>
+              <input
+                id="routeToVideo"
+                name="routeToVideo"
                 placeholder="ex: gs://irsnbucket/nomevideo.flac"
                 value={routeToVideo}
                 onChange={({ target }) => setRouteToVideo(target.value)}
                 className="block w-full rounded-md p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
               />
-            </div>
-          </div>
+            </>
+          )}
+
           <button
             onClick={handleSendRoute}
             disabled={awaiting}

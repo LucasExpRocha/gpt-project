@@ -6,28 +6,31 @@ import { Navbar } from "@/components/Navbar";
 import { conceptsDDD } from "@/utils/conceptsDDD";
 import { useEffect, useState } from "react";
 
-type MyTranscriptions = {
+export type MyTranscriptions = {
   [key: string]: string;
 };
 
 const Page = () => {
   const [selected, setSelected] = useState("");
-  const [teste, setTeste] = useState("");
+  const [selectedContent, setSelectedContent] = useState("");
   const [transcriptionsList, setTranscriptionsList] =
     useState<MyTranscriptions>({});
-
-  useEffect(() => {
-    setTeste(transcriptionsList[selected]);
-  }, [selected, transcriptionsList]);
+  const [saveButton, setSaveButton] = useState(false);
 
   const handleChangeSelectedValue = (value: string) => {
-    setTeste(value);
+    setSelectedContent(value);
     transcriptionsList[selected] = value;
+    setSaveButton(true);
   };
 
   const handleGenerateProposal = () => {
     if (selected === "") return;
-    const text = localStorage.getItem("promptDDD") + "\n" + teste;
+    const text =
+      localStorage.getItem("promptDDD") +
+      "\n" +
+      selectedContent +
+      "\n" +
+      "Monte a resposta em markdown.";
     const filename = `${selected}.txt`;
     const blob = new Blob([text], { type: "text/plain" });
 
@@ -40,11 +43,25 @@ const Page = () => {
     URL.revokeObjectURL(link.href);
   };
 
-  useEffect(() => {
-    localStorage.setItem("promptDDD", conceptsDDD);
+  const getTranscriptions = () => {
     setTranscriptionsList(
       JSON.parse(localStorage.getItem("transcriptions") || "{}")
     );
+  };
+
+  const handleSaveContentChanges = () => {
+    localStorage.setItem("transcriptions", JSON.stringify(transcriptionsList));
+  }
+
+  useEffect(() => {
+    setSelectedContent(transcriptionsList[selected]);
+    setSaveButton(false);
+    getTranscriptions();
+  }, [selected]);
+
+  useEffect(() => {
+    localStorage.setItem("promptDDD", conceptsDDD);
+    getTranscriptions();
   }, []);
 
   return (
@@ -53,6 +70,7 @@ const Page = () => {
       <div className="flex mx-auto max-w-7xl">
         <Aside
           transcriptions={transcriptionsList}
+          setTranscriptions={setTranscriptionsList}
           setSelectTranscription={setSelected}
           selected={selected}
         />
@@ -61,9 +79,16 @@ const Page = () => {
           <main className="px-4 py-2">
             <textarea
               className="w-full min-h-vh-minus-200 resize-none bg-transparent p-2"
-              value={teste}
+              value={selectedContent}
               onChange={({ target }) => handleChangeSelectedValue(target.value)}
             />
+            {saveButton && (
+              <button 
+              onClick={handleSaveContentChanges}
+              className="rounded bg-green-700 bg-opacity-80 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75">
+                Salvar Alterações
+              </button>
+            )}
           </main>
         </div>
       </div>

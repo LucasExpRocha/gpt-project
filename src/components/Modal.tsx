@@ -8,7 +8,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export const Modal = ({ isOpen, closeModal, tailwindCss, children }: Props) => {
+export const Modal = ({ isOpen, closeModal, tailwindCss = "max-w-6x1", children }: Props) => {
   return (
     <>
       <Transition appear show={isOpen} as={Fragment}>
