@@ -1,14 +1,14 @@
-import { Dialog, Transition } from '@headlessui/react'
-import { Fragment, useState } from 'react'
+import { Dialog, Transition } from "@headlessui/react";
+import { Fragment, HTMLAttributes } from "react";
 
 interface Props {
   isOpen: boolean;
   closeModal: () => void;
+  tailwindCss?: string;
   children?: React.ReactNode;
 }
 
-export const Modal = ({isOpen, closeModal, children}: Props) => {
-
+export const Modal = ({ isOpen, closeModal, tailwindCss, children }: Props) => {
   return (
     <>
       <Transition appear show={isOpen} as={Fragment}>
@@ -36,7 +36,12 @@ export const Modal = ({isOpen, closeModal, children}: Props) => {
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-6xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel
+                  className={`
+                    w-full  transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all
+                    ${tailwindCss}
+                  `}
+                >
                   {children}
                 </Dialog.Panel>
               </Transition.Child>
@@ -45,5 +50,5 @@ export const Modal = ({isOpen, closeModal, children}: Props) => {
         </Dialog>
       </Transition>
     </>
-  )
-}
+  );
+};

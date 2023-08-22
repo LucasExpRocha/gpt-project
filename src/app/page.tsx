@@ -3,66 +3,63 @@
 import { Aside } from "@/components/Aside";
 import { Header } from "@/components/Header";
 import { Navbar } from "@/components/Navbar";
+import { CircleAnimated } from "@/components/circleAnimated";
+import { conceptsDDD } from "@/utils/conceptsDDD";
 import { useEffect, useState } from "react";
-import { ToastContainer } from "react-toastify";
 
 type MyTranscriptions = {
   [key: string]: string;
 };
 
-const transcricoes: MyTranscriptions = {
-  "1s": "aaaa",
-  "2s": "bbbb",
-  "3s": "cccc",
-  "4s": "dddd",
-  "5s": "eeee",
-  "6s": "ffff",
-  "7s": "gggg",
-  "8s": "hhhh",
-  "9s": "iiii",
-  "10s": "jjjj",
-  "11s": "kkkk",
-  "12s": "llll",
-  "13s": "mmmm",
-  "14s": "nnnn",
-  "15s": "oooo",
-  "16s": "pppp",
-  "17s": "qqqq",
-  "18s": "rrrr",
-  "19s": "ssss",
-  "20s": "tttt",
-  "21s": "uuuu",
-  "22s": "vvvv",
-  "23s": "wwww",
-  "24s": "xxxx",
-  "25s": "yyyy",
-  "26s": "zzzz",
-};
-
 const Page = () => {
   const [selected, setSelected] = useState("");
   const [teste, setTeste] = useState("");
-  
+  const [transcriptionsList, setTranscriptionsList] =
+    useState<MyTranscriptions>({});
+
   useEffect(() => {
-    setTeste(transcricoes[selected]);
-  },[selected]);
-  
+    setTeste(transcriptionsList[selected]);
+  }, [selected, transcriptionsList]);
+
   const handleChangeSelectedValue = (value: string) => {
     setTeste(value);
-    transcricoes[selected] = value;
+    transcriptionsList[selected] = value;
   };
+
+  const handleGenerateProposal = () => {
+    if (selected === "") return;
+    const text = localStorage.getItem("promptDDD") + "\n" + teste;
+    const filename = `${selected}.txt`;
+    const blob = new Blob([text], { type: "text/plain" });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+
+    link.click();
+
+    URL.revokeObjectURL(link.href);
+  };
+
+  useEffect(() => {
+    localStorage.setItem("promptDDD", conceptsDDD);
+    setTranscriptionsList(
+      JSON.parse(localStorage.getItem("transcriptions") || "{}")
+    );
+  }, []);
 
   return (
     <div className="min-h-screen">
       <Navbar />
       <div className="flex mx-auto max-w-7xl">
         <Aside
-          transcriptions={transcricoes}
+          transcriptions={transcriptionsList}
           setSelectTranscription={setSelected}
           selected={selected}
-        />
+        />grandes mudançasmuit
+
         <div className="flex flex-col w-full max-h-vh-max-120">
-          <Header />
+          <Header generateProposal={handleGenerateProposal} />
           <main className="px-4 py-2">
             <textarea
               className="w-full min-h-vh-minus-200 resize-none bg-transparent p-2"

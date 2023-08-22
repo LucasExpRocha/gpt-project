@@ -41,7 +41,7 @@ export const Navbar = () => {
           </button>
         </div>
       </div>
-      <Modal isOpen={isOpen} closeModal={handleCloseModal}>
+      <Modal isOpen={isOpen} closeModal={handleCloseModal} tailwindCss="max-w-2xl">
         <form className="space-y-6" action="#" method="POST">
           <div>
             <label
