@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Modal } from "./Modal";
 import { Dialog } from "@headlessui/react";
 import { SavedMessage } from "./SaveMessage";
-import Image from "next/image";
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,7 +27,7 @@ export const Navbar = () => {
     <nav className="">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
-          <Image
+          <img
             className="h-8 w-auto"
             src="https://arphoenix.com.br/wp-content/uploads/2021/06/arp_logo.png"
             alt="ARPhoenix"
