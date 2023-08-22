@@ -20,16 +20,34 @@ export const Aside = ({
 }: Props) => {
   const [isOpen, setIsOpen] = useState(false);
   const [routeToVideo, setRouteToVideo] = useState("");
+  const [routeToVideoBase64, setRouteToVideoBase64] = useState("");
   const [awaiting, setAwaiting] = useState(false);
-  const [optionFileSelected, setOptionFileSelected] = useState(false);
+  const [optionFileSelected, setOptionFileSelected] = useState("file");
 
   const handleCloseModal = () => setIsOpen(false);
   const handleOpenModal = () => setIsOpen(true);
-  const handleOptionFileSelected = () => setOptionFileSelected(true);
-  const handleOptionUrlSelected = () => setOptionFileSelected(false);
+  const handleOptionFileSelected = () => setOptionFileSelected("file");
+  const handleOptionUrlSelected = () => setOptionFileSelected("url");
 
   const handleSelectTranscription = ({ target }: any) => {
     setSelectTranscription(target.innerText);
+  };
+
+  const handleFileChange = async ({ target }: any) => {
+    const file = target.files[0];
+
+    if (file.type === "audio/flac") {
+      const reader = new FileReader();
+
+      console.log(reader)
+
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const result = e.target?.result as string;
+        setRouteToVideoBase64(result.split(',')[1]);
+      };
+
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleSendRoute = async () => {
@@ -37,9 +55,16 @@ export const Aside = ({
 
     setAwaiting(true);
     try {
-      const transcribe = await api.post("/speech/transcribe/meetings", {
-        fileName: routeToVideo,
-      });
+      let transcribe;
+      if (optionFileSelected === "file") {
+        transcribe = await api.post("/speech/transcribe/upload", {
+          fileName: routeToVideoBase64,
+        });
+      } else {
+        transcribe = await api.post("/speech/transcribe/meetings", {
+          fileName: routeToVideo,
+        });
+      }
       const othersTranscriptions = localStorage.getItem("transcriptions");
       const newTranscriptions = {
         ...JSON.parse(othersTranscriptions || "{}"),
@@ -100,7 +125,7 @@ export const Aside = ({
           <div className="flex justify-between">
             <button
               className={
-                (!optionFileSelected
+                (optionFileSelected === "url"
                   ? "border-b-2 border-x-cyan-100"
                   : "border-b-0") + " mx-auto h-full w-full pb-2"
               }
@@ -110,7 +135,7 @@ export const Aside = ({
             </button>
             <button
               className={
-                (optionFileSelected
+                (optionFileSelected === "file"
                   ? "border-b-2 border-x-cyan-100"
                   : "border-b-0") + " mx-auto h-full w-full pb-2"
               }
@@ -120,7 +145,7 @@ export const Aside = ({
             </button>
           </div>
 
-          {optionFileSelected ? (
+          {optionFileSelected === "file" ? (
             <>
               <label
                 htmlFor="routeToVideo"
@@ -134,7 +159,7 @@ export const Aside = ({
                 type="file"
                 accept=".flac"
                 placeholder="ex: gs://irsnbucket/nomevideo.flac"
-                value={routeToVideo}
+                onChange={handleFileChange}
                 className="block w-full rounded-md p-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6"
               />
             </>
@@ -159,8 +184,8 @@ export const Aside = ({
 
           <button
             onClick={handleSendRoute}
-            disabled={awaiting}
-            className="rounded bg-slate-600 bg-opacity-80 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+            disabled={awaiting || (routeToVideo === "" && routeToVideoBase64 === "")}
+            className="rounded bg-slate-600 bg-opacity-80 px-4 py-2 text-sm font-medium disabled:bg-opacity-30 text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
           >
             {awaiting ? (
               <>
