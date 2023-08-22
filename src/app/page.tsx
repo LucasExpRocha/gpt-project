@@ -3,7 +3,6 @@
 import { Aside } from "@/components/Aside";
 import { Header } from "@/components/Header";
 import { Navbar } from "@/components/Navbar";
-import { CircleAnimated } from "@/components/circleAnimated";
 import { conceptsDDD } from "@/utils/conceptsDDD";
 import { useEffect, useState } from "react";
 
@@ -56,8 +55,7 @@ const Page = () => {
           transcriptions={transcriptionsList}
           setSelectTranscription={setSelected}
           selected={selected}
-        />grandes mudançasmuit
-
+        />
         <div className="flex flex-col w-full max-h-vh-max-120">
           <Header generateProposal={handleGenerateProposal} />
           <main className="px-4 py-2">
