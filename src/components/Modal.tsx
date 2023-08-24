@@ -8,7 +8,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export const Modal = ({ isOpen, closeModal, tailwindCss = "max-w-6x1", children }: Props) => {
+export const Modal = ({ isOpen, closeModal, tailwindCss = "max-w-full", children }: Props) => {
   return (
     <>
       <Transition appear show={isOpen} as={Fragment}>
@@ -38,8 +38,7 @@ export const Modal = ({ isOpen, closeModal, tailwindCss = "max-w-6x1", children 
               >
                 <Dialog.Panel
                   className={`
-                    w-full  transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all
-                    ${tailwindCss}
+                    w-full transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all ${tailwindCss}
                   `}
                 >
                   {children}

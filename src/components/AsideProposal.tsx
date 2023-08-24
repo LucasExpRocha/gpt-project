@@ -7,19 +7,15 @@ import { MyTranscriptions } from "@/app/page";
 
 interface Props {
   transcriptions: { [key: string]: string };
-  setSelectTranscription: Dispatch<SetStateAction<string>>;
-  selected: string;
+  setSelectTranscription: (key: string) => void;
+  selected: string[];
 }
 
-export const Aside = ({
+export const AsideProposal = ({
   transcriptions,
   setSelectTranscription,
   selected,
 }: Props) => {
-  const handleSelectTranscription = ({ target }: any) => {
-    setSelectTranscription(target.innerText);
-  };
-
   return (
     <aside className="min-h-vh-minus-120">
       <fieldset className="mx-auto w-72 rounded h-full border-solid border-2 border-slate-400">
@@ -31,16 +27,22 @@ export const Aside = ({
             {transcriptions ? (
               Object.keys(transcriptions).map((key) => {
                 return (
-                  <li
-                    key={key}
-                    onClick={handleSelectTranscription}
-                    className={`${
-                      selected === key
-                        ? "bg-zinc-300 px-6 py-1"
-                        : "bg-transparent px-6 py-1"
-                    }  block w-full cursor-pointer px-2 py-1 text-sm font-medium hover:text-gray-500 focus:outline-none focus:text-gray-500 transition duration-150 ease-in-out`}
-                  >
-                    {key}
+                  <li key={key}>
+                    <input
+                      type="checkbox"
+                      name={key}
+                      id={key}
+                      className="hidden"
+                    />
+                    <label
+                      htmlFor={key}
+                      onClick={() => setSelectTranscription(key)}
+                      className={`${
+                        selected.includes(key) ? "bg-slate-200" : ""
+                      } block w-full cursor-pointer px-2 py-1 text-sm font-medium hover:text-gray-500 focus:outline-none focus:text-gray-500 transition duration-150 ease-in-out`}
+                    >
+                      {key}
+                    </label>
                   </li>
                 );
               })

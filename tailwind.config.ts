@@ -21,6 +21,9 @@ const config: Config = {
         'vh-max-120': 'calc(100vh - 120px)',
         'vh-aside': '569px'
       },
+      backgroundColor: {
+        greenGpt: 'rgb(25, 195, 125)'
+      },
     },
   },
   plugins: [],

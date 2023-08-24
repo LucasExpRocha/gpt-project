@@ -1,70 +1,40 @@
 import { useEffect, useState } from "react";
 import { Modal } from "./Modal";
 import { SavedMessage } from "./SaveMessage";
+import { ArrowLeft } from "@phosphor-icons/react";
+import { ButtonGPT } from "./buttonGPT";
 
 interface Props {
-  generateProposal: () => void;
+  closeModal: () => void;
+  showButtonSave: boolean;
+  onClickButtonSave: () => void;
 }
 
-export const Header = ({ generateProposal }: Props) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [dddValue, setDddValue] = useState("");
-  const [showMessage, setShowMessage] = useState(false);
-
-  const handleCloseModal = () => setIsOpen(false);
-  const handleOpenModal = () => setIsOpen(true);
-
-  const handleChangePromptDDD = ({ target }: any) => setDddValue(target.value);
-  const handleSavePromptDDD = () => {
-    setShowMessage(true);
-    setTimeout(() => {
-      setShowMessage(false);
-    }, 1500);
-    localStorage.setItem("promptDDD", dddValue);
-  };
-
-  useEffect(() => {
-    setDddValue(localStorage.getItem("promptDDD") || "");
-  }, []);
-
+export const Header = ({
+  closeModal,
+  showButtonSave,
+  onClickButtonSave,
+}: Props) => {
   return (
-    <header className="flex justify-between max-w-4xl w-full mx-auto my-2">
-      <button
-        onClick={handleOpenModal}
-        className="rounded bg-slate-600 bg-opacity-80 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
-      >
-        Prompt DDD
-      </button>
-      <button
-        onClick={generateProposal}
-        className="rounded bg-slate-600 bg-opacity-80 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
-      >
-        Gerar Proposta
-      </button>
-      <Modal
-        closeModal={handleCloseModal}
-        isOpen={isOpen}
-        tailwindCss="max-w-6xl"
-      >
-        <textarea
-          className="w-full min-h-vh-minus-200 min-max-w-7xl resize-none bg-transparent p-2"
-          onChange={handleChangePromptDDD}
-          defaultValue={dddValue}
-        />
+    <header className="flex justify-between items-center max-w-6xl w-full mx-auto my-2">
+      {showButtonSave ? (
         <button
-          onClick={handleSavePromptDDD}
-          className="rounded bg-slate-600 bg-opacity-80 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+          onClick={onClickButtonSave}
+          className="rounded bg-green-600 bg-opacity-80 px-4 h-[30px] text-sm font-medium text-white hover:scale-105 hover:opacity-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
         >
-          Salvar
+          Salvar Alterações
         </button>
-        <button
-          onClick={handleCloseModal}
-          className="rounded bg-red-600 ml-2 bg-opacity-80 px-4 py-2 text-sm font-medium text-white hover:bg-opacity-30 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
-        >
-          Fechar
-        </button>
-      </Modal>
-      {showMessage && <SavedMessage />}
+      ) : (
+        <span className="w-[150px]"></span>
+      )}
+      <ButtonGPT text="Corrigir Texto" onClick={closeModal} />
+      <button
+        onClick={closeModal}
+        className="flex items-center gap-1 text-red-600 underline underline-offset-4 hover:scale-105"
+      >
+        <ArrowLeft size={14} />
+        <span>Retornar</span>
+      </button>
     </header>
   );
 };
