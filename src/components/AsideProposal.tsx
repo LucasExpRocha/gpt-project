@@ -1,12 +1,8 @@
-import { Dispatch, SetStateAction, useRef, useState } from "react";
-import { Modal } from "./Modal";
-import axios from "axios";
-import { CircleAnimated } from "./circleAnimated";
-import { api } from "@/services/api";
 import { MyTranscriptions } from "@/app/page";
 
+
 interface Props {
-  transcriptions: { [key: string]: string };
+  transcriptions: MyTranscriptions;
   setSelectTranscription: (key: string) => void;
   selected: string[];
 }
@@ -41,7 +37,7 @@ export const AsideProposal = ({
                         selected.includes(key) ? "bg-slate-200" : ""
                       } block w-full cursor-pointer px-2 py-1 text-sm font-medium hover:text-gray-500 focus:outline-none focus:text-gray-500 transition duration-150 ease-in-out`}
                     >
-                      {key}
+                      {transcriptions[key].name}
                     </label>
                   </li>
                 );

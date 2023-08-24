@@ -1,24 +1,21 @@
-import { Dispatch, SetStateAction, useRef, useState } from "react";
-import { Modal } from "./Modal";
-import axios from "axios";
-import { CircleAnimated } from "./circleAnimated";
-import { api } from "@/services/api";
 import { MyTranscriptions } from "@/app/page";
+import { Check, Pen, X } from "@phosphor-icons/react";
+import { Dispatch, SetStateAction, useState } from "react";
 
 interface Props {
-  transcriptions: { [key: string]: string };
+  transcriptions: MyTranscriptions;
   setSelectTranscription: Dispatch<SetStateAction<string>>;
   selected: string;
+  changeNameTranscription: (key: string, name: string) => void;
 }
 
 export const Aside = ({
   transcriptions,
   setSelectTranscription,
   selected,
+  changeNameTranscription,
 }: Props) => {
-  const handleSelectTranscription = ({ target }: any) => {
-    setSelectTranscription(target.innerText);
-  };
+  const [disabledInput, setDisabledInput] = useState("");
 
   return (
     <aside className="min-h-vh-minus-120">
@@ -30,17 +27,47 @@ export const Aside = ({
           <ul className="max-h-vh-aside overflow-y-auto">
             {transcriptions ? (
               Object.keys(transcriptions).map((key) => {
+                let name = transcriptions[key].name;
                 return (
                   <li
                     key={key}
-                    onClick={handleSelectTranscription}
+                    onClick={() => setSelectTranscription(key)}
                     className={`${
                       selected === key
                         ? "bg-zinc-300 px-6 py-1"
                         : "bg-transparent px-6 py-1"
-                    }  block w-full cursor-pointer px-2 py-1 text-sm font-medium hover:text-gray-500 focus:outline-none focus:text-gray-500 transition duration-150 ease-in-out`}
+                    } flex w-full cursor-pointer px-2 py-1 text-sm font-medium hover:text-gray-500 focus:outline-none focus:text-gray-500 transition duration-150 ease-in-out`}
                   >
-                    {key}
+                    {Boolean(disabledInput !== name) ? (
+                      <span className="w-full">{name}</span>
+                    ) : (
+                      <input
+                        className="px-1"
+                        type="text"
+                        disabled={Boolean(disabledInput !== name)}
+                        defaultValue={name}
+                        onChange={({ target }) => (name = target.value)}
+                      />
+                    )}
+                    {Boolean(disabledInput !== name) ? (
+                      <Pen onClick={() => setDisabledInput(name)} />
+                    ) : (
+                      <div className="flex gap-2 bg-white">
+                        <Check
+                          onClick={() => {
+                            changeNameTranscription(key, name);
+                            setDisabledInput("");
+                          }}
+                          color="green"
+                          size={20}
+                        />
+                        <X
+                          onClick={() => setDisabledInput("")}
+                          color="red"
+                          size={20}
+                        />
+                      </div>
+                    )}
                   </li>
                 );
               })

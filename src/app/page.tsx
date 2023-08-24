@@ -5,6 +5,7 @@ import { AsideProposal } from "@/components/AsideProposal";
 import { Header } from "@/components/Header";
 import { Modal } from "@/components/Modal";
 import { Navbar } from "@/components/Navbar";
+import { SavedMessage } from "@/components/SaveMessage";
 import { ButtonGPT } from "@/components/buttonGPT";
 import { CircleAnimated } from "@/components/circleAnimated";
 import { api } from "@/services/api";
@@ -15,11 +16,12 @@ import {
   ClipboardText,
   MusicNotes,
   TextT,
+  X,
 } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
 export type MyTranscriptions = {
-  [key: string]: string;
+  [key: string]: { name: string; content: string };
 };
 
 const Page = () => {
@@ -46,8 +48,10 @@ const Page = () => {
 
   const handleChangeSelectedValue = (value: string) => {
     setSelectedContent(value);
-    transcriptionsList[selected] = value;
-    setSaveButton(true);
+    transcriptionsList[selected] = {
+      ...transcriptionsList[selected],
+      content: value,
+    };
   };
 
   const handleOpenCorrection = () => setOpenCorrection(!openCorrection);
@@ -57,28 +61,7 @@ const Page = () => {
   const handleChangeOptionFileSelected = () =>
     setOptionFileSelected(optionFileSelected === "url" ? "file" : "url");
 
-  const handleGenerateProposal = () => {
-    if (selected === "") return;
-    const text =
-      localStorage.getItem("promptDDD") +
-      "\n" +
-      selectedContent +
-      "\n" +
-      "Monte a resposta em markdown.";
-    const filename = `${selected}.txt`;
-    const blob = new Blob([text], { type: "text/plain" });
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-
-    link.click();
-
-    URL.revokeObjectURL(link.href);
-  };
-
   const handleSelectTranscriptionProposal = (key: string) => {
-    let x;
     if (selectTranscriptionProposal.includes(key)) {
       setSelectTranscriptionProposal(
         selectTranscriptionProposal.filter((item) => item !== key)
@@ -90,15 +73,6 @@ const Page = () => {
     setSelectTranscriptionProposal([...selectTranscriptionProposal, key]);
   };
 
-  useEffect(() => {
-    setSelectTranscriptionProposalContent(
-      selectTranscriptionProposal
-        .map((item) => transcriptionsList[item])
-        .join("\n")
-    );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectTranscriptionProposal]);
-
   const getTranscriptions = () => {
     setTranscriptionsList(
       JSON.parse(localStorage.getItem("transcriptions") || "{}")
@@ -107,6 +81,11 @@ const Page = () => {
 
   const handleSaveContentChanges = () => {
     localStorage.setItem("transcriptions", JSON.stringify(transcriptionsList));
+    setSaveButton(true);
+
+    setTimeout(() => {
+      setSaveButton(false);
+    }, 1000);
   };
 
   const handleSendRoute = async () => {
@@ -127,7 +106,10 @@ const Page = () => {
       const othersTranscriptions = localStorage.getItem("transcriptions");
       const newTranscriptions = {
         ...JSON.parse(othersTranscriptions || "{}"),
-        [urlToVideo]: transcribe.data.transcription,
+        [urlToVideo]: {
+          name: [urlToVideo],
+          content: transcribe.data.transcription,
+        },
       };
       localStorage.setItem("transcriptions", JSON.stringify(newTranscriptions));
     } catch (error) {
@@ -137,10 +119,32 @@ const Page = () => {
     }
   };
 
+  const handleChangeNameTranscription = (key: string, name: string) => {
+    const newTranscriptions = JSON.parse(
+      localStorage.getItem("transcriptions") || "{}"
+    );
+    newTranscriptions[key].name = name;
+    localStorage.setItem("transcriptions", JSON.stringify(newTranscriptions));
+    setTranscriptionsList(newTranscriptions);
+  };
+
   useEffect(() => {
-    setSelectedContent(transcriptionsList[selected]);
-    setSaveButton(false);
-    getTranscriptions();
+    setSelectTranscriptionProposalContent(
+      selectTranscriptionProposal
+        .map((item) => transcriptionsList[item].content)
+        .join("\n")
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectTranscriptionProposal]);
+
+  useEffect(() => {
+    if (!Boolean(selected)) return;
+    if (!Boolean(selected)) return;
+    const transcriptions: MyTranscriptions = JSON.parse(
+      localStorage.getItem("transcriptions") || "{}"
+    );
+    setTranscriptionsList(transcriptions);
+    setSelectedContent(transcriptions[selected]?.content);
   }, [selected]);
 
   useEffect(() => {
@@ -180,7 +184,9 @@ const Page = () => {
           onClick={handleOpenProposal}
           className="w-48 h-60 rounded-lg flex flex-col justify-center items-center bg-indigo-500 shadow-md shadow-indigo-500/50 gap-6 hover:scale-105"
         >
-          <span className="text-white font-semibold">Aplicar conceitos de DDD</span>
+          <span className="text-white font-semibold">
+            Aplicar conceitos de DDD
+          </span>
           <div className="flex items-center gap-2">
             <Checks size={32} color="white" />
             <CaretDoubleRight size={16} color="white" />
@@ -282,6 +288,7 @@ const Page = () => {
         <Modal isOpen={openCorrection} closeModal={handleOpenCorrection}>
           <div className="flex mx-auto ">
             <Aside
+              changeNameTranscription={handleChangeNameTranscription}
               transcriptions={transcriptionsList}
               setSelectTranscription={setSelected}
               selected={selected}
@@ -296,6 +303,7 @@ const Page = () => {
                 <textarea
                   className="w-full min-h-vh-minus-200 resize-none bg-transparent p-2 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-300 focus:border-transparent"
                   value={selectedContent}
+                  disabled={selected === ""}
                   onChange={({ target }) =>
                     handleChangeSelectedValue(target.value)
                   }
@@ -309,12 +317,19 @@ const Page = () => {
       )}
       {openProposal && (
         <Modal isOpen={openProposal} closeModal={handleOpenProposal}>
-          <div className="flex mx-auto gap-2">
+          <button
+            onClick={handleOpenProposal}
+            className="absolute right-0 top-0 rounded-bl-2xl bg-red-600 p-1 hover:cursor-pointer hover:scale-105 hover:opacity-30"
+          >
+            <X size={24} color="white" />
+          </button>
+          <div className="flex mx-auto gap-2 mt-2">
             <AsideProposal
               transcriptions={transcriptionsList}
               setSelectTranscription={handleSelectTranscriptionProposal}
               selected={selectTranscriptionProposal}
             />
+
             <section className="flex w-full gap-4">
               <fieldset className="mx-auto rounded h-full border-solid border-2 border-slate-400 w-full">
                 <legend className="text-base font-semibold leading-6 text-gray-700 top-[-10px] bg-gradient-to-t mx-2 px-2">
@@ -324,6 +339,16 @@ const Page = () => {
                   value={selectTranscriptionProposalContent}
                   className="w-full h-full resize-none bg-transparent p-2 focus:outline-none focus:ring-0 focus:ring-gray-300 focus:border-transparent"
                 />
+                <span className="text-sm font-light">
+                  {
+                    (
+                      conceptsDDD +
+                      selectTranscriptionProposalContent +
+                      "Gostaria que você utilizasse os princípios de DDD - Domain Driven Design para encontrar as entidades e casos de usos da solicitação do cliente em markdown para JavaScript."
+                    ).split(" ").length
+                  }{" "}
+                  palavra(s).
+                </span>
               </fieldset>
               <div className="flex flex-col min-w-[150px] justify-center items-center gap-2">
                 <ButtonGPT
@@ -334,9 +359,9 @@ const Page = () => {
                 />
                 <CaretDoubleRight size={32} />
               </div>
-              <fieldset className="mx-auto w-72 rounded h-full border-solid border-2 border-slate-400 w-full">
+              <fieldset className="mx-auto w-full rounded h-full border-solid border-2 border-slate-400">
                 <legend className="text-base font-semibold leading-6 text-gray-700 top-[-10px] bg-gradient-to-t mx-2 px-2">
-                Entidades e Casos de Uso
+                  Entidades e Casos de Uso
                 </legend>
                 <textarea className="w-full h-full resize-none bg-transparent p-2 focus:outline-none focus:ring-0 focus:ring-gray-300 focus:border-transparent" />
               </fieldset>
@@ -344,6 +369,7 @@ const Page = () => {
           </div>
         </Modal>
       )}
+      {saveButton && <SavedMessage />}
     </main>
   );
 };
