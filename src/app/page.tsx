@@ -167,6 +167,7 @@ const Page = () => {
             <TextT size={32} color="white" />
           </div>
         </button>
+        <CaretDoubleRight size={32} color="grey" />
         <button
           onClick={handleOpenCorrection}
           className="w-48 h-60 rounded-lg flex flex-col justify-center items-center  bg-blue-500 shadow-md shadow-blue-500/50 gap-6 hover:scale-105"
@@ -180,6 +181,7 @@ const Page = () => {
             <Checks size={32} color="white" />
           </div>
         </button>
+        <CaretDoubleRight size={32} color="grey" />
         <button
           onClick={handleOpenProposal}
           className="w-48 h-60 rounded-lg flex flex-col justify-center items-center bg-indigo-500 shadow-md shadow-indigo-500/50 gap-6 hover:scale-105"
